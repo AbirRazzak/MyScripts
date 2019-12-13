@@ -119,6 +119,52 @@ def simulate_steps(moons: List[Moon], steps: int):
     print(energy_output)
 
 
+def get_state(moons: List[Moon]) -> str:
+    state = ''
+    for moon in moons:
+        state += str(moon.pos.x)
+        state += str(moon.pos.y)
+        state += str(moon.pos.z)
+        state += str(moon.vel.x)
+        state += str(moon.vel.y)
+        state += str(moon.vel.z)
+    return state
+
+
+def loop_step_calculator(moons: List[Moon]):
+    print('Running simulations, please wait...')
+    moon_states = {}
+    i = 1
+    while True:
+        # Calculate new state
+        new_moons = []
+        for j in range(len(moons)):
+            old_pos = moons[j].pos
+            old_vel = moons[j].vel
+            vel = calc_velocity(moons, j)
+
+            new_vel = add_coords(old_vel, vel)
+            new_pos = add_coords(old_pos, new_vel)
+            new_moon = Moon(new_pos, new_vel)
+
+            new_moons.append(new_moon)
+        moons = new_moons
+        state = get_state(moons)
+
+        # Check if state occurred before
+        previous_state_step = moon_states.get(state)
+        if previous_state_step is not None:
+            print('Step {} imitates step {}!'.format(i, previous_state_step))
+            return
+
+        # Add new state to dictionary
+        moon_states[state] = i
+
+        if i % 10000 == 0:
+            print('{} runs in...'.format(i))
+        i += 1
+
+
 if __name__ == '__main__':
     moons = [
         Moon(Coord(5, 4, 4)),
@@ -126,4 +172,9 @@ if __name__ == '__main__':
         Moon(Coord(0, 7, 0)),
         Moon(Coord(-13, 2, 10))
     ]
+
+    # PART 1
     simulate_steps(moons, 1000)
+
+    # PART 2
+    loop_step_calculator(moons)
