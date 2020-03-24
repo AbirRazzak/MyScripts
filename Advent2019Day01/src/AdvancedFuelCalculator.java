@@ -1,6 +1,6 @@
-public class FuelCalculator extends Filter {
+public class AdvancedFuelCalculator extends FuelCalculator {
 
-    public FuelCalculator(Pipe input_, Pipe output_) {
+    public AdvancedFuelCalculator(Pipe input_, Pipe output_) {
         super(input_, output_);
     }
 
@@ -8,13 +8,9 @@ public class FuelCalculator extends Filter {
     protected void transform() {
         try {
             Object currentInput = input_.get();
-            int i = 1;
             while (currentInput != null && !currentInput.equals("STOP")) {
                 int massToConvert = Integer.parseInt(currentInput.toString());
-                int currentFuelCalculation = convertMassToFuel(massToConvert);
-                System.out.println(i + ". " + massToConvert + " -> " + currentFuelCalculation);
-                output_.put(currentFuelCalculation);
-                i++;
+                advancedFuelCalculation(massToConvert);
                 currentInput = input_.get();
             }
 
@@ -30,7 +26,11 @@ public class FuelCalculator extends Filter {
         }
     }
 
-    int convertMassToFuel(int mass) {
-        return (mass / 3) - 2;
+    void advancedFuelCalculation(int initialMass) {
+        int subFuel = convertMassToFuel(initialMass);
+        if(subFuel > 0) {
+            output_.put(subFuel);
+            advancedFuelCalculation(subFuel);
+        }
     }
 }
