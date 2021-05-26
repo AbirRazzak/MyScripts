@@ -3,7 +3,17 @@ from advent2020.day03.simulator import TobogganSimulator
 
 
 def run_part_1():
-    forest_input=""".#..........#...#...#..#.......
+    num_trees = traverse_slope(3, 1)
+    print(num_trees)
+
+
+def run_part_2():
+    answer = traverse_slope(1, 1) * traverse_slope(3, 1) * traverse_slope(5, 1) * traverse_slope(7, 1) * traverse_slope(1, 2)
+    print(answer)
+
+
+def traverse_slope(x_input: int, y_input: int):
+    forest_input = """.#..........#...#...#..#.......
 .###...#.#.##..###..#...#...#..
 #.....#................#...#.#.
 #.....#..###.............#....#
@@ -327,28 +337,25 @@ def run_part_1():
 ..#....#....#......#..##..#...#
 #.........#..#..#...........#.."""
 
-    x_input = 3
-    y_input = 1
-
     forest = Forest()
     forest.convert_text_to_object(forest_input)
-
     toboggan = Toboggan(
         velocity=Velocity(
             x_velocity=x_input,
             y_velocity=y_input
         )
     )
-
     simulator = TobogganSimulator(
         forest=forest,
         toboggan=toboggan
     )
-
     num_trees = simulator.traverse_down_slope()
-    print(num_trees)
+    return num_trees
 
 
 if __name__ == '__main__':
-    print('Running...')
+    print('Running part 1...')
     run_part_1()
+
+    print('Running part 2...')
+    run_part_2()
