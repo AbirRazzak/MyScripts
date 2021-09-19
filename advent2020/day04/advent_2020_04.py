@@ -3,6 +3,7 @@ from pydantic import BaseModel, validator
 from pydantic.tools import parse_obj_as
 from pydantic.types import conint, constr
 
+
 class NorthPoleCredential(BaseModel):
     byr: conint(ge=1920, le=2002)
     iyr: conint(ge=2010, le=2020)
@@ -65,6 +66,7 @@ class PassportScanner:
         
         return input_as_dict
 
+
 class BatchFileParser:
     def parse_batch_file(
         self,
@@ -81,6 +83,7 @@ class BatchFileParser:
                 valid_passports.append(valid_passport)
         
         return valid_passports
+
 
 if __name__ == '__main__':
     print('Setting up passport scanner...')
