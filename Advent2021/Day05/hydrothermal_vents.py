@@ -71,7 +71,10 @@ class VentLine(BaseModel):
 
         return coordinates
 
-    def calculate_line_segment(self) -> List[Coordinate]:
+    def calculate_line_segment(
+        self,
+        part_number: int
+    ) -> List[Coordinate]:
         if self.start.x == self.end.x:
             horizontal_coordinates = self._get_horizontal_line_segment_coordinates()
             return horizontal_coordinates
@@ -81,9 +84,10 @@ class VentLine(BaseModel):
             return vertical_coordinates
 
         # Comment this out for part 1:
-        if abs(self.start.x - self.end.x) == abs(self.start.y - self.end.y):
-            diagonal_coordinates = self._get_diagonal_line_segment_coordinates()
-            return diagonal_coordinates
+        if part_number == 2:
+            if abs(self.start.x - self.end.x) == abs(self.start.y - self.end.y):
+                diagonal_coordinates = self._get_diagonal_line_segment_coordinates()
+                return diagonal_coordinates
 
         return []
 
@@ -162,13 +166,15 @@ class HydrothermalVents(BaseModel):
             self.board[coordinate_key] = new_coordinate_to_add
 
     def process_lines(
-        self
+        self,
+        part_number: int,
+        verbose: bool = False
     ):
         counter = 0
         for line in self.vent_lines:
             counter += 1
-            coordinates_to_record = line.calculate_line_segment()
-            print(f'{counter}: Processing line {line} -- {[str(c) for c in coordinates_to_record]}')
+            coordinates_to_record = line.calculate_line_segment(part_number)
+            print(f'{counter:3}: Processing {line} -- {[str(c) for c in coordinates_to_record]}') if verbose else 0
 
             for coordinate_to_record in coordinates_to_record:
                 self.increment_coordinate_count(coordinate_to_record)

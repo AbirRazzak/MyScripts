@@ -12,12 +12,22 @@ EXAMPLE_INPUT = '''0,9 -> 5,9
 5,5 -> 8,2'''
 
 
-def test():
+def test_part1():
     vents = HydrothermalVents(vent_lines=[])
     vents.parse_vent_lines(EXAMPLE_INPUT)
-    vents.process_lines()
+    vents.process_lines(part_number=1, verbose=True)
 
     result = vents.get_number_of_dangerous_coordinates(2)
 
     assert result == 5
+
+
+def test_part2():
+    vents = HydrothermalVents(vent_lines=[])
+    vents.parse_vent_lines(EXAMPLE_INPUT)
+    vents.process_lines(part_number=2, verbose=True)
+
+    result = vents.get_number_of_dangerous_coordinates(2)
+
+    assert result == 12
 
