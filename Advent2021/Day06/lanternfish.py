@@ -1,3 +1,4 @@
+import functools
 from typing import List
 
 from pydantic import BaseModel
@@ -44,3 +45,29 @@ class LanternfishSchoolManager(BaseModel):
             output += timers_formatted
 
         return output
+
+
+class LanternfishSchoolSizeForecaster:
+    initial_fish: List[int]
+
+    def __init__(
+        self,
+        starting_fish: List[int]
+    ):
+        self.initial_fish = starting_fish
+
+    @functools.cache
+    def _forecast_total_offspring_from_fish(self, fish: int, days: int):
+        if fish < days:
+            extra_offspring = int(((days - fish - 1) / 7))
+            offspring = 1 + extra_offspring
+            for i in range(extra_offspring):
+                offspring += self._forecast_total_offspring_from_fish(8, ((days - fish - 1) - (7 * i)))
+            return offspring
+        return 0
+
+    def forecast_school_size(self, days: int):
+        count = len(self.initial_fish)
+        for fish in self.initial_fish:
+            count += self._forecast_total_offspring_from_fish(fish=fish, days=days)
+        return count
