@@ -1,4 +1,4 @@
-from advent2020.day03.models import Forest, ForestElement
+from Advent_Of_Code.Advent2020.day03.models import Forest, ForestElement
 
 
 def test_forest_convert_from_text_to_object():

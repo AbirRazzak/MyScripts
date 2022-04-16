@@ -1,5 +1,5 @@
-from advent2020.day03.models import Forest, ForestElement, Toboggan, Velocity
-from advent2020.day03.simulator import TobogganSimulator
+from Advent_Of_Code.Advent2020.day03.models import Forest, ForestElement, Toboggan, Velocity
+from Advent_Of_Code.Advent2020.day03.simulator import TobogganSimulator
 
 
 def test_simulator_traverse_down_slope():

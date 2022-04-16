@@ -1,4 +1,4 @@
-from advent2020.day03.models import Forest, Toboggan, ForestElement
+from Advent_Of_Code.Advent2020.day03.models import Forest, Toboggan, ForestElement
 
 
 class TobogganSimulator:

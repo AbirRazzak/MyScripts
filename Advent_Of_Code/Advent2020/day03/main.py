@@ -1,5 +1,5 @@
-from advent2020.day03.models import Forest, Toboggan, Velocity
-from advent2020.day03.simulator import TobogganSimulator
+from Advent_Of_Code.Advent2020.day03.models import Forest, Toboggan, Velocity
+from Advent_Of_Code.Advent2020.day03.simulator import TobogganSimulator
 
 
 def run_part_1():
