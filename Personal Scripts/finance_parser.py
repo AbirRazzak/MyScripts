@@ -77,42 +77,6 @@ def group_amex_transactions_by_date(amex_transactions: list[AmexTransaction]) ->
     }
 
 
-def is_personal_captial_transaction_in_amex_transactions(
-    personal_capital_transaction: PersonalCapitalTransaction,
-    amex_transactions_by_date: dict[datetime.datetime, list[AmexTransaction]]
-) -> bool:
-    """
-    Checks if the Personal Capital transaction is in the AMEX transactions
-    :param personal_capital_transaction: PersonalCapitalTransaction
-    :param amex_transactions_by_date: dictionary of lists of AmexTransaction
-    :return: bool
-    """
-    return any(
-        datetime.datetime.strptime(personal_capital_transaction['Date'], PERSONAL_CAPITAL_CSV_DATE_FORMAT) == datetime.datetime.strptime(amex_transaction['Date'], AMEX_CSV_DATE_FORMAT) and
-        # personal_capital_transaction['Account'] == amex_transaction['Account'] and
-        # personal_capital_transaction['Description'] == amex_transaction['Description'] and
-        abs(float(personal_capital_transaction['Amount'])) == abs(float(amex_transaction['Amount']))
-        for amex_transaction in amex_transactions_by_date.get(datetime.datetime.strptime(personal_capital_transaction['Date'], PERSONAL_CAPITAL_CSV_DATE_FORMAT), [])
-    )
-
-
-def gather_personal_capital_transactions_in_amex_transactions(
-    personal_capital_transactions: list[PersonalCapitalTransaction],
-    amex_transactions_by_date: dict[datetime.datetime, list[AmexTransaction]]
-) -> list[PersonalCapitalTransaction]:
-    """
-    Gathers the Personal Capital transactions in the AMEX transactions
-    :param personal_capital_transactions: list of PersonalCapitalTransaction
-    :param amex_transactions_by_date: dictionary of lists of AmexTransaction
-    :return: list of PersonalCapitalTransaction
-    """
-    return [
-        personal_capital_transaction
-        for personal_capital_transaction in personal_capital_transactions
-        if is_personal_captial_transaction_in_amex_transactions(personal_capital_transaction, amex_transactions_by_date)
-    ]
-
-
 class SplitMethod(Enum):
     HALF = '50/50'
     NONE = '100/0'
@@ -121,11 +85,11 @@ class SplitMethod(Enum):
 class CSVMaker:
     def __init__(
         self, 
-        personal_captial_transactions: list[PersonalCapitalTransaction],
+        personal_capital_transactions: list[PersonalCapitalTransaction],
         amex_transactions_by_date: dict[datetime.datetime, list[AmexTransaction]],
         split_method: SplitMethod
     ):
-        self.personal_captial_transactions = personal_captial_transactions
+        self.personal_capital_transactions = personal_capital_transactions
         self.amex_transactions_by_date = amex_transactions_by_date
         self.split_method = split_method
 
@@ -143,7 +107,7 @@ class CSVMaker:
         if personal_capital_transaction['Account'] != 'Amex Gold Cards':
             return True
         
-        return is_personal_captial_transaction_in_amex_transactions(personal_capital_transaction, self.amex_transactions_by_date)
+        return self._is_personal_capital_transaction_in_amex_transactions(personal_capital_transaction)
     
     def get_csv_file_contents(self) -> str:
         """
@@ -151,7 +115,7 @@ class CSVMaker:
         :return: str
         """
         csv_file_contents = 'Date,Description,Category,Amount\n'
-        for personal_capital_transaction in self.personal_captial_transactions:
+        for personal_capital_transaction in self.personal_capital_transactions:
             if self.include_personal_capital_transaction_in_output(personal_capital_transaction):
                 csv_file_contents += ','.join([
                     personal_capital_transaction['Date'],
@@ -160,6 +124,29 @@ class CSVMaker:
                     self._split_transaction_amount(personal_capital_transaction['Amount'])
                 ]) + '\n'
         return csv_file_contents
+
+    def _is_personal_capital_transaction_in_amex_transactions(
+        self,
+        personal_capital_transaction: PersonalCapitalTransaction
+    ) -> bool:
+        """
+        Checks if the Personal Capital transaction is in the AMEX transactions
+        :param personal_capital_transaction: PersonalCapitalTransaction
+        :return: bool
+        """
+
+        transaction_date = datetime.datetime.strptime(personal_capital_transaction['Date'],
+                                                      PERSONAL_CAPITAL_CSV_DATE_FORMAT)
+        transaction_amount = abs(float(personal_capital_transaction['Amount']))
+
+        amex_transactions_on_date = self.amex_transactions_by_date.get(transaction_date, [])
+
+        for amex_transaction_on_date in amex_transactions_on_date:
+            if abs(float(amex_transaction_on_date['Amount'])) == transaction_amount:
+                self.amex_transactions_by_date[transaction_date].remove(amex_transaction_on_date)
+                return True
+
+        return False
 
     def _split_transaction_amount(
         self,
@@ -189,8 +176,11 @@ if __name__ == '__main__':
     personal_capital_transactions = read_personal_capital_csv(PERSONAL_CAPITAL_CSV)
 
     csv_maker = CSVMaker(
-        personal_captial_transactions=personal_capital_transactions, 
+        personal_capital_transactions=personal_capital_transactions,
         amex_transactions_by_date=amex_transactions_by_date,
         split_method=SplitMethod.HALF
     )
     csv_maker.write_csv_file(OUTPUT_FILE_NAME)
+
+    # Display any leftover amex transactions that were not in the personal capital data set
+    pprint(csv_maker.amex_transactions_by_date)
